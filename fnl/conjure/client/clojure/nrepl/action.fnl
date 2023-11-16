@@ -516,12 +516,17 @@
                     (if (and (= 2 (a.count msgs))
                              (= "nil" (a.get (a.first msgs) :value)))
                       (log.append ["; Success!"])
-                      (a.run! #(ui.display-result
-                                 $1
-                                 {:simple-out? true
-                                  :raw-out? (cfg [:test :raw_out])
-                                  :ignore-nil? true})
-                              msgs))))))))))))
+                      (do (log.append [(.. "; Errors in " (extract.context) "/" test-name)])
+                        (each [k v (ipairs msgs)]
+                          (log.append [(. v :out)]))
+                        (log.append [(tostring (length msgs))])
+                        (log.append [(. (a.first msgs) :out)])
+                        (a.run! #(ui.display-result
+                                   $1
+                                   {:simple-out? true
+                                    :raw-out? (cfg [:test :raw_out])
+                                    :ignore-nil? true})
+                                msgs)))))))))))))
 
 (defn- refresh-impl [op]
   (server.with-conn-and-ops-or-warn
